@@ -1,0 +1,24 @@
+{
+  "name": "crud-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Amits64/crud-app.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Amits64/crud-app/issues"
+  },
+  "homepage": "https://github.com/Amits64/crud-app#readme",
+  "dependencies": {
+    "express": "^4.18.2",
+    "prom-client": "^15.0.0"
+  }
+}
