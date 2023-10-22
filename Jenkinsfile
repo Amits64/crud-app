@@ -28,8 +28,8 @@ pipeline {
                         withSonarQubeEnv('SonarQube') {
                             sh """
                             sonar-scanner \
-                            -Dsonar.host.url=http://192.168.10.11:9000/ \
-                            -Dsonar.projectKey=crud-app
+                            -Dsonar.host.url=http://192.168.101.7:9000/ \
+                            -Dsonar.projectKey="${image}"
                             """
                         }
                     }
@@ -67,17 +67,17 @@ pipeline {
 
         stage('Deploying Container to Kubernetes') {
             steps {
-                dir('smtp-mailer') {
+                dir('crud-app') {
                     script {
-                        // Check if the release "calci" exists
-                        def releaseExists = sh(returnStatus: true, script: 'helm ls | grep -q "smtp-mailer"') == 0
+                        // Check if the release "image" exists
+                        def releaseExists = sh(returnStatus: true, script: 'helm ls | grep -q ${image}') == 0
                         if (releaseExists) {
                             // Delete the release
-                            sh 'helm delete smtp-mailer'
+                            sh 'helm delete ${image}'
                         }
 
                         // Install Helm chart
-                        sh "helm install smtp-mailer ./ --set appimage=${registry}/${image}:${tag} --set-file ca.crt=/etc/ca-certificates/update.d/jks-keystore"
+                        sh "helm install ${image} ./ --set appimage=${registry}/${image}:${tag} --set-file ca.crt=/etc/ca-certificates/update.d/jks-keystore"
                     }
                 }
             }
