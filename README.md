@@ -1,5 +1,5 @@
 # Node.js REST API with Docker, Kubernetes, Prometheus, and Grafana
-This project demonstrates how to build and deploy a Node.js-based RESTful API using Docker and Kubernetes. Additionally, it showcases how to monitor and alert using Prometheus and Grafana.
+This project demonstrates how to build and deploy a Node.js-based RESTful API using Docker and Kubernetes. Additionally, it showcases how to monitor and alert using Prometheus and Grafana along with Code Quality using SonarQube.
 
 # Prerequisites
 Before you get started, ensure you have the following installed:
