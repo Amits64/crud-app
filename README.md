@@ -86,14 +86,25 @@ To install prometheus and Grafana you need to run the following command
 
 We are using kube-prometheus-stack because it comes with prometheus all the dependencies which we need to install.
 
-Now edit the service in using `kubectl edit svc` command and expose the grafana service.
+Now edit the service in using `kubectl edit svc` command and expose the grafana service and crud-app as "LoadBalancer" as shown in below image:
 
-`Login to Grafana and navigate to the Home > select Dashboards > select Kubernetes/ComputeResources/Pod` and select the pods which we have deployed it looks like this:
+![image](https://github.com/Amits64/crud-app/assets/135766785/f695215e-3685-47df-9882-9580d394de29)
+
+`Login to Grafana and navigate to the Home > select Dashboards > select your Pod template` to display we have deployed it looks like this:
+
+![image](https://github.com/Amits64/crud-app/assets/135766785/b7fc793f-25a9-4848-bec3-fc7e6b0a9699)
 
 # Selenium Testing
 This project also includes Selenium testing using Mocha to ensure the functionality of your Node.js application. To run the tests, follow the command in the project's root directory:
 
     npx mocha selenium-project/src/test/java/com/selenium/selenium-test.js
+
+# Screenshots:
+
+![Screenshot](https://github.com/Amits64/crud-app/assets/135766785/75198580-5af7-4861-a34b-0f6ec176bb6c)
+
+![scrapMetrics](https://github.com/Amits64/crud-app/assets/135766785/1b2601cd-bfbc-4a0f-a60a-1d1734ae604a)
+
 
 # Contributing
 Feel free to contribute to this project. Fork the repository, make your changes, and submit a pull request.
