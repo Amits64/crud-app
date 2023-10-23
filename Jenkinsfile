@@ -4,7 +4,7 @@ pipeline {
     environment {
         registry = 'amits64'
         registryCredential = 'dockerhub'
-	image = 'crud-app'
+        image = 'crud-app'
         tag = "v${BUILD_NUMBER}"
     }
 
@@ -28,8 +28,9 @@ pipeline {
                         withSonarQubeEnv('SonarQube') {
                             sh """
                             sonar-scanner \
-                            -Dsonar.host.url=http://192.168.101.7:9000/ \
-                            -Dsonar.projectKey="${image}"
+                            -Dsonar.host.url=http://192.168.101.2:9000/ \
+                            -Dsonar.projectKey="${image}" \
+                            -Dsonar.exclusions=**/*.java
                             """
                         }
                     }
@@ -51,7 +52,11 @@ pipeline {
                 script {
                     // Push the Docker image to the registry
                     docker.withRegistry('', registryCredential) {
-                        docker.image("${registry}/${image}:${tag}").push()
+                        def imageWithTag = docker.image("${registry}/${image}:${tag}")
+                        imageWithTag.push()
+                        
+                        // Push the same image with the 'latest' tag
+                        imageWithTag.push('latest')
                     }
                 }
             }
@@ -67,8 +72,8 @@ pipeline {
 
         stage('Deploying Container to Kubernetes') {
             steps {
-                dir('crud-app') {
-                    script {
+                script {
+                    dir('crud-app') {
                         // Check if the release "image" exists
                         def releaseExists = sh(returnStatus: true, script: 'helm ls | grep -q ${image}') == 0
                         if (releaseExists) {
@@ -82,5 +87,27 @@ pipeline {
                 }
             }
         }
+
+        stage('Selenium Testing') {
+            steps {
+                script {
+                    dir('selenium-project') {
+                        sh 'mvn clean test'
+                    }    
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            script {
+                def testResults = currentBuild.resultIsBetterOrEqualTo('SUCCESS') ? 0 : 1
+                if (testResults != 0) {
+                    error("Selenium tests failed!")
+                }
+            }
+        }
     }
 }
+
