@@ -101,6 +101,8 @@ This project also includes Selenium testing using Mocha to ensure the functional
 
 # Screenshots:
 
+![image](https://github.com/Amits64/crud-app/assets/135766785/91483d40-639b-4550-8c9f-241b1c32556f)
+
 ![Screenshot](https://github.com/Amits64/crud-app/assets/135766785/75198580-5af7-4861-a34b-0f6ec176bb6c)
 
 ![scrapMetrics](https://github.com/Amits64/crud-app/assets/135766785/1b2601cd-bfbc-4a0f-a60a-1d1734ae604a)
