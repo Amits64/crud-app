@@ -1,20 +1,25 @@
 # Use an official Node.js runtime as the base image
 FROM node:14
 
-# Set the working directory in the container
-WORKDIR /app
+# Create a non-root user and group for running the application
+RUN groupadd -g 1001 nonroot && useradd -u 1001 -g nonroot -m nonroot
 
-# Copy package.json and package-lock.json to the container
-COPY package*.json ./
+# Create a directory for your app and set it as the working directory
+WORKDIR /usr/src/app
 
-# Install Node.js dependencies
+# Copy specific files and directories required for the image to run
+COPY package.json .
+COPY package-lock.json .
+COPY index.js .
+
+# Install app dependencies as the non-root user
 RUN npm install
 
-# Copy the rest of your application code to the container
-COPY . .
-
-# Expose the port your application is running on
+# Expose the port your app will run on
 EXPOSE 3000
 
-# Define the command to start your Node.js application
-CMD [ "node", "app.js" ]
+# Switch to the non-root user for running the application
+USER nonroot
+
+# Define the command to run your Node.js application
+CMD ["node", "index.js"]
