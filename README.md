@@ -20,12 +20,15 @@ Run the following command to start the project:
 This command will initialize a node.js project in your directory and you have package.json file.
 
 Installing dependencies
-For this project we need to install dependencies like express.js and prom-client. To install the dependencies run the following command:
+For this project we need to install dependencies like `express.js` and `prom-client`. To install the dependencies run the following command:
 
-npm i express prom-client
+   ```bash
+   npm i express prom-client
+   ```
+
 Creating configuration file and testing configuration locally
-We need a configuration file and we need to create index.js file and write the configurations and Run the node index.js to test the application whether it is working properly or not.
-Go the the browser and search this address localhost:3000/metrics and you will see something like this:
+We need a configuration file and we need to create `index.js` file and write the configurations and Run the node index.js to test the application whether it is working properly or not.
+Go the the browser and search this address `localhost:3000/metrics` and you will see something like this:
 
 metrics
 
