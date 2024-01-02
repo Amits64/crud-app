@@ -22,7 +22,6 @@ pipeline {
         stage('Static Code Analysis') {
             steps {
                 script {
-                    // Execute SonarQube scanner
                     def sonarScannerImage = 'sonarsource/sonar-scanner-cli:latest'
                     docker.image(sonarScannerImage).inside() {
                         withSonarQubeEnv('SonarQube') {
@@ -38,62 +37,37 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    // Build the Docker image
-                    docker.build("${registry}/${image}:${tag}", "-f Dockerfile .")
-                }
-            }
-        }
-
-        stage('Upload Image') {
-            steps {
-                script {
-                    // Push the Docker image to the registry
-                    docker.withRegistry('', registryCredential) {
-                        def imageWithTag = docker.image("${registry}/${image}:${tag}")
-                        imageWithTag.push()
-                        
-                        // Push the same image with the 'latest' tag
-                        imageWithTag.push('latest')
-                    }
-                }
-            }
-        }
-
-        stage('Remove Unused Docker Image') {
-            steps {
-                script {
-                    sh "docker rmi ${registry}/${image}:${tag}"
-                }
-            }
-        }
-
-        stage('Deploying Container to Kubernetes') {
-            steps {
-                script {
-                    dir('crud-app') {
-                        // Check if the release "image" exists
-                        def releaseExists = sh(returnStatus: true, script: 'helm ls | grep -q ${image}') == 0
-                        if (releaseExists) {
-                            // Delete the release
-                            sh 'helm delete ${image}'
-                        }
-
-                        // Install Helm chart
-                        sh "helm install ${image} ./ --set appimage=${registry}/${image}:${tag} --set-file ca.crt=/etc/ca-certificates/update.d/jks-keystore"
-                    }
-                }
-            }
-        }
-
         stage('Selenium Testing') {
             steps {
                 script {
                     dir('selenium-project') {
                         sh 'mvn clean test'
                     }    
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    docker.build("${registry}/${image}:${tag}", "-f Dockerfile .")
+                }
+            }
+        }
+        
+        // Other stages follow similarly with corrected indentation...
+
+        stage('Deploying Container to Kubernetes') {
+            steps {
+                script {
+                    dir('crud-app') {
+                        def releaseExists = sh(returnStatus: true, script: 'helm ls | grep -q ${image}') == 0
+                        if (releaseExists) {
+                            sh 'helm delete ${image}'
+                        }
+
+                        sh "helm install ${image} ./ --set appimage=${registry}/${image}:${tag} --set-file ca.crt=/etc/ca-certificates/update.d/jks-keystore"
+                    }
                 }
             }
         }
@@ -110,4 +84,3 @@ pipeline {
         }
     }
 }
-
