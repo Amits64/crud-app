@@ -1,115 +1,59 @@
-# Node.js REST API with Docker, Kubernetes, Prometheus, and Grafana
-This project demonstrates how to build and deploy a Node.js-based RESTful API using Docker and Kubernetes. Additionally, it showcases how to monitor and alert using Prometheus and Grafana along with Code Quality using SonarQube.
+```markdown
+# Automating SonarQube Monitoring and Restart on Windows
 
-# Prerequisites
-Before you get started, ensure you have the following installed:
+## Step 1: Create a PowerShell Script
 
-* Node.js and npm
-* Docker
-* Kubernetes cluster (e.g., Minikube, Docker Desktop, or a cloud-based solution)
-* Prometheus and Grafana set up in your Kubernetes cluster
+Create a PowerShell script, let's call it `sonarqube_monitor.ps1`, with the following content:
 
-# Getting Started
-Run the following command to start the project:
+```powershell
+$serviceName = "SonarQube"
 
-  ```bash
-  mkdir crud-app
-  cd crud-app
-  npm init -y
-  ```
-This command will initialize a node.js project in your directory and you have package.json file.
+# Check if SonarQube service is running
+$status = Get-Service -Name $serviceName -ErrorAction SilentlyContinue
 
-Installing dependencies
-For this project we need to install dependencies like `express.js` and `prom-client`. To install the dependencies run the following command:
+if ($status -eq $null) {
+    Write-Host "SonarQube service not found. Starting SonarQube..."
+    Start-Service -Name $serviceName
+} elseif ($status.Status -ne "Running") {
+    Write-Host "SonarQube service is not running. Starting SonarQube..."
+    Start-Service -Name $serviceName
+} else {
+    Write-Host "SonarQube service is running."
+}
+```
 
-   ```bash
-   npm i express prom-client
-   ```
+## Step 2: Set Up Task Scheduler
 
-Creating configuration file and testing configuration locally
-We need a configuration file and we need to create `index.js` file and write the configurations and Run the node index.js to test the application whether it is working properly or not.
-Go the the browser and search this address `localhost:3000/metrics` and you will see something like this:
+1. Open Task Scheduler by searching for it in the Start menu.
 
-metrics
+2. Click on "Create Task..." in the Actions pane on the right side.
 
-For more results check the Screenshots Directory.
+3. In the General tab:
+   - Give the task a name like "SonarQube Monitor".
+   - Optionally, provide a description.
 
-Containerizing the application
-Create a Dockerfile and put the following configuration:
+4. In the Triggers tab:
+   - Click "New...".
+   - Choose "Daily" and set the start time to 10:00 AM.
+   - Optionally, set a recurrence pattern if you want to run it every day.
 
-    # Use an official Node.js runtime as the base image
-    FROM node:14
-    
-    # Create a non-root user and group for running the application
-    RUN groupadd -g 1001 nonroot && useradd -u 1001 -g nonroot -m nonroot
-    
-    # Create a directory for your app and set it as the working directory
-    WORKDIR /usr/src/app
-    
-    # Copy specific files and directories required for the image to run
-    COPY package.json .
-    COPY package-lock.json .
-    COPY index.js .
-    
-    # Install app dependencies as the non-root user
-    RUN npm install
-    
-    # Expose the port your app will run on
-    EXPOSE 3000
-    
-    # Switch to the non-root user for running the application
-    USER nonroot
-    
-    # Define the command to run your Node.js application
-    CMD ["node", "index.js"]
+5. In the Actions tab:
+   - Click "New...".
+   - Set the action to "Start a program".
+   - Browse and select `powershell.exe`.
+   - In the "Add arguments" field, enter the path to your PowerShell script:
+     ```
+     -ExecutionPolicy Bypass -File "C:\path\to\sonarqube_monitor.ps1"
+     ```
+     Replace `"C:\path\to\sonarqube_monitor.ps1"` with the actual path to your PowerShell script.
 
-# Building and tagging and pushing the image to Dockerhub
-Use below commands to build a docker image
+6. Click "OK" to save the action.
 
-    docker build -t amits64/crud-app .
-    docker push amits64/crud-app
+7. Optionally, configure other settings as needed in the Conditions, Settings, and Advanced tabs.
 
-# Deploy the Image to Kubernetes
-In this project we are deploying our manifest file using helm. Run the following command to deploy using helm:
+8. Click "OK" to create the task.
 
-    helm create crud-app
+Now, the Task Scheduler will run your PowerShell script every day at 10:00 AM. The script will check if the SonarQube service is running and start it if it's not. Adjust paths and timings as needed.
+```
 
-Write the manifest file for the application and place it to `crud-app/template` directory. Then run the following command
-    
-    helm install crud-app crud-app
-
-This will deploy the application on kubernetes cluster.
-
-# Setting up the Prometheus and Grafana
-To install prometheus and Grafana you need to run the following command
-
-    helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-    helm repo update
-    helm install my-kube-prometheus-stack prometheus-community/kube-prometheus-stack --version 51.4.0
-
-We are using kube-prometheus-stack because it comes with prometheus all the dependencies which we need to install.
-
-Now edit the service in using `kubectl edit svc` command and expose the grafana service and crud-app as "LoadBalancer" as shown in below image:
-
-![image](https://github.com/Amits64/crud-app/assets/135766785/f695215e-3685-47df-9882-9580d394de29)
-
-`Login to Grafana and navigate to the Home > select Dashboards > select your Pod template` to display we have deployed it looks like this:
-
-![image](https://github.com/Amits64/crud-app/assets/135766785/b7fc793f-25a9-4848-bec3-fc7e6b0a9699)
-
-# Selenium Testing
-This project also includes Selenium testing using Mocha to ensure the functionality of your Node.js application. To run the tests, follow the command in the project's root directory:
-
-    npx mocha selenium-project/src/test/java/com/selenium/selenium-test.js
-
-# Screenshots:
-
-![image](https://github.com/Amits64/crud-app/assets/135766785/91483d40-639b-4550-8c9f-241b1c32556f)
-
-![Screenshot](https://github.com/Amits64/crud-app/assets/135766785/75198580-5af7-4861-a34b-0f6ec176bb6c)
-
-![scrapMetrics](https://github.com/Amits64/crud-app/assets/135766785/1b2601cd-bfbc-4a0f-a60a-1d1734ae604a)
-
-
-# Contributing
-Feel free to contribute to this project. Fork the repository, make your changes, and submit a pull request.
+You can copy and paste this content into a Markdown file and then publish it on GitHub. Adjustments to the paths and descriptions can be made accordingly.
