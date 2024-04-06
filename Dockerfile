@@ -1,5 +1,5 @@
 # Use an official Node.js runtime as the base image
-FROM node:18.19.1-bookworm-slim
+FROM node:18.20.1-bookworm-slim
 
 # Create a non-root user and group for running the application
 RUN groupadd -g 1001 nonroot && useradd -u 1001 -g nonroot -m nonroot
