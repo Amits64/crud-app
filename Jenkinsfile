@@ -24,10 +24,10 @@ pipeline {
                 script {
                     def sonarScannerImage = 'sonarsource/sonar-scanner-cli:latest'
                     docker.image(sonarScannerImage).inside() {
-                        withSonarQubeEnv('SonarQube') {
+                        withSonarQubeEnv('sonarqube') {
                             sh """
                             sonar-scanner \
-                            -Dsonar.host.url=http://192.168.101.2:9000/ \
+                            -Dsonar.host.url=http://192.168.10.10:9000/ \
                             -Dsonar.projectKey="${image}" \
                             -Dsonar.exclusions=**/*.java
                             """
