@@ -23,7 +23,7 @@ client.collectDefaultMetrics({
 
 // MySQL connection using connection string
 const mysqlConnection = mysql.createPool({
-    host: '192.168.10.10',
+    host: 'localhost',
     user: 'root',
     password: 'Kubernetes@1993',
     database: 'accounts'

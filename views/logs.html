@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Logs</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            margin: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #333;
+            color: #fff;
+        }
+        tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+        .pagination-controls {
+            text-align: center;
+            padding: 10px;
+        }
+        .pagination-controls button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            margin: 0 5px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 4px;
+        }
+        .pagination-controls button:hover {
+            background-color: #0056b3;
+        }
+        .error-message {
+            color: red;
+            text-align: center;
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Database Logs</h1>
+        <div id="error" class="error-message"></div>
+    </header>
+
+    <main>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Operation</th>
+                    <th>Table</th>
+                    <th>Old Data</th>
+                    <th>New Data</th>
+                    <th>Timestamp</th>
+                </tr>
+            </thead>
+            <tbody id="logs-table-body">
+                <!-- Logs will be populated here by JavaScript -->
+            </tbody>
+        </table>
+
+        <div id="pagination-controls" class="pagination-controls"></div>
+    </main>
+
+    <script>
+        let currentPage = 1;
+        const rowsPerPage = 10;
+
+        async function fetchLogs(page = 1) {
+            try {
+                const response = await fetch(`/logs?page=${page}&limit=${rowsPerPage}`);
+                if (!response.ok) throw new Error('Network response was not ok.');
+                const data = await response.json();
+
+                if (data.error) {
+                    document.getElementById('error').innerText = data.error;
+                    return;
+                }
+
+                const logs = data.logs || [];
+                const totalLogs = data.totalLogs || 0;
+                const tbody = document.getElementById('logs-table-body');
+                tbody.innerHTML = logs.map(log => `
+                    <tr>
+                        <td>${log.id}</td>
+                        <td>${log.operation}</td>
+                        <td>${log.table_name}</td>
+                        <td>${log.old_data || ''}</td>
+                        <td>${log.new_data || ''}</td>
+                        <td>${log.timestamp}</td>
+                    </tr>
+                `).join('');
+
+                updatePaginationControls(totalLogs, page);
+            } catch (error) {
+                document.getElementById('error').innerText = 'Failed to fetch logs: ' + error.message;
+            }
+        }
+
+        function updatePaginationControls(totalLogs, currentPage) {
+            const totalPages = Math.ceil(totalLogs / rowsPerPage);
+            const paginationControls = document.getElementById('pagination-controls');
+            paginationControls.innerHTML = `
+                ${currentPage > 1 ? `<button onclick="fetchLogs(${currentPage - 1})">Previous</button>` : ''}
+                ${currentPage < totalPages ? `<button onclick="fetchLogs(${currentPage + 1})">Next</button>` : ''}
+            `;
+        }
+
+        // Fetch the first page of logs on page load
+        fetchLogs(currentPage);
+    </script>
+</body>
+</html>
