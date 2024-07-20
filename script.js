@@ -130,5 +130,5 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Example fetch on page load
-    fetchTableData('exampleDB', 'exampleTable'); // Replace with actual DB and table names
+    fetchTableData('crypto_coins', 'logs'); // Replace with actual DB and table names
 });

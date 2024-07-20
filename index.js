@@ -234,28 +234,29 @@ app.put('/table/:dbName/:tableName/:id', async (req, res) => {
 
     try {
         const [result] = await mysqlConnection.query(`UPDATE ${dbName}.${tableName} SET ${updates} WHERE id = ?`, [...values, id]);
+        if (result.affectedRows === 0) return res.status(404).send('Row not found.');
 
         // Log the operation
         try {
-            await mysqlConnection.query('INSERT INTO logs (operation, table_name, data, timestamp) VALUES (?, ?, ?, NOW())', ['UPDATE', `${dbName}.${tableName}`, JSON.stringify({ id, ...data })]);
+            await mysqlConnection.query('INSERT INTO logs (operation, table_name, data, timestamp) VALUES (?, ?, ?, NOW())', ['UPDATE', `${dbName}.${tableName}`, JSON.stringify(data)]);
         } catch (logErr) {
             console.error('Error logging operation:', logErr);
         }
 
-        if (result.affectedRows === 0) return res.status(404).send('Record not found.');
-
-        res.send({ message: 'Record updated successfully' });
+        res.send({ id, ...data });
     } catch (err) {
         console.error('Error updating data:', err);
         res.status(500).send('Error updating data.');
     }
 });
 
-// Delete existing row from table
+// Delete row from table
 app.delete('/table/:dbName/:tableName/:id', async (req, res) => {
     const { dbName, tableName, id } = req.params;
+
     try {
         const [result] = await mysqlConnection.query(`DELETE FROM ${dbName}.${tableName} WHERE id = ?`, [id]);
+        if (result.affectedRows === 0) return res.status(404).send('Row not found.');
 
         // Log the operation
         try {
@@ -264,9 +265,7 @@ app.delete('/table/:dbName/:tableName/:id', async (req, res) => {
             console.error('Error logging operation:', logErr);
         }
 
-        if (result.affectedRows === 0) return res.status(404).send('Record not found.');
-
-        res.send({ message: 'Record deleted successfully' });
+        res.send({ message: 'Row deleted successfully' });
     } catch (err) {
         console.error('Error deleting data:', err);
         res.status(500).send('Error deleting data.');
@@ -276,20 +275,10 @@ app.delete('/table/:dbName/:tableName/:id', async (req, res) => {
 // Metrics endpoint
 app.get('/metrics', async (req, res) => {
     res.setHeader('Content-Type', register.contentType);
-    res.end(await register.metrics());
+    res.send(await register.metrics());
 });
 
-// Serve static HTML files
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'views', 'index.html'));
-});
-
-// Error handler
-app.use((err, req, res, next) => {
-    console.error('Unhandled error:', err);
-    res.status(500).send('Internal server error.');
-});
-
+// Start the server
 app.listen(port, () => {
-    console.log(`Server listening on port ${port}`);
+    console.log(`Server is running on port ${port}`);
 });
