@@ -1,7 +1,7 @@
 {
   "name": "crud-app",
   "version": "1.0.0",
-  "description": "Your project description",
+  "description": "CRUD App for performing CRUD operations on Databases",
   "main": "index.js",
   "scripts": {
     "test": "mocha selenium-test.js --require glob"
@@ -11,7 +11,7 @@
     "url": "https://github.com/Amits64/crud-app.git"
   },
   "keywords": [],
-  "author": "Your Name",
+  "author": "DevOps-Tech",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/Amits64/crud-app/issues"
