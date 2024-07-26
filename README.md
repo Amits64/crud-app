@@ -1,9 +1,9 @@
 [![ci](https://github.com/Amits64/crud-app/actions/workflows/docker.yml/badge.svg)](https://github.com/Amits64/crud-app/actions/workflows/docker.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Amits64_crud-app&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Amits64_crud-app)
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=Amits64_crud-app&metric=bugs)](https://sonarcloud.io/summary/new_code?id=Amits64_crud-app)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=Amits64_crud-app&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=Amits64_crud-app)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=Amits64_crud-app&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=Amits64_crud-app)
 [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=Amits64_crud-app&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=Amits64_crud-app)
-[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=Amits64_crud-app&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=Amits64_crud-app)
 # CRUD Application
 
 ## Overview
