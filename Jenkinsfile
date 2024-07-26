@@ -5,16 +5,53 @@ pipeline {
         registry = 'amits64'
         registryCredential = 'dockerhub'
         image = 'crud-app'
-        tag = "${env.TAG}"
+        tag = "${env.TIMESTAMP}"  // Use TIMESTAMP environment variable
     }
 
     stages {
         stage('Git Checkout') {
             steps {
-                git branches: 'crud-app-v2' url: 'https://github.com/Amits64/crud-app.git'
+                checkout scm
             }
         }
 
+        stage('Static Code Analysis') {
+            steps {
+                script {
+                    def sonarScannerImage = 'sonarsource/sonar-scanner-cli:latest'
+                    docker.image(sonarScannerImage).inside() {
+                        withSonarQubeEnv('sonarqube') {
+                            sh """
+                            sonar-scanner \
+                            -Dsonar.host.url=http://192.168.10.10:9000/ \
+                            -Dsonar.projectKey="${image}" \
+                            -Dsonar.exclusions=**/*.java
+                            """
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Selenium Testing') {
+            steps {
+                script {
+                    dir('selenium-project') {
+                        sh 'mvn clean test'
+                    }    
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    // Build the Docker image with the TIMESTAMP tag
+                    docker.build("${registry}/${image}:${tag}", "-f Dockerfile .")
+                }
+            }
+        }
+        
         stage('Deploying Container to Kubernetes') {
             steps {
                 script {
@@ -26,17 +63,6 @@ pipeline {
 
                     // Deploy the new Docker image to Kubernetes
                     sh "helm install ${image} ./ --set appimage=${registry}/${image}:${tag} --set-file ca.crt=/etc/ca-certificates/update.d/jks-keystore"
-                }
-            }
-        }
-    }
-
-    post {
-        always {
-            script {
-                def testResults = currentBuild.resultIsBetterOrEqualTo('SUCCESS') ? 0 : 1
-                if (testResults != 0) {
-                    error("Selenium tests failed!")
                 }
             }
         }
