@@ -13,8 +13,8 @@ jobs:
       - name: SonarQube Scan
         uses: kitabisa/sonarqube-action@master
         with:
-          host: ${{ secrets.SONARQUBE_HOST }}
-          login: ${{ secrets.SONARQUBE_TOKEN }}
+          host: ${{ secrets.SONAR_HOST }}
+          login: ${{ secrets.SONAR_TOKEN }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
