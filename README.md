@@ -5,6 +5,7 @@
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=Amits64_crud-app&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=Amits64_crud-app)
 [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=Amits64_crud-app&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=Amits64_crud-app)
 # CRUD Application
+[![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-white.svg)](https://sonarcloud.io/summary/new_code?id=Amits64_crud-app)
 
 ## Overview
 This project is a CRUD (Create, Read, Update, Delete) application built using Node.js and Express, with a MySQL database for storing user information. The application allows for user registration, login, and management of user data, including role-based access control. It also features logging of database operations and Prometheus metrics for monitoring.
