@@ -1,3 +1,5 @@
+
+https://github.com/user-attachments/assets/502cd075-fd97-42c9-8286-fac7eb79a606
 [![ci](https://github.com/Amits64/crud-app/actions/workflows/docker.yml/badge.svg)](https://github.com/Amits64/crud-app/actions/workflows/docker.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Amits64_crud-app&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Amits64_crud-app)
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=Amits64_crud-app&metric=bugs)](https://sonarcloud.io/summary/new_code?id=Amits64_crud-app)
@@ -150,3 +152,10 @@ docker run -p 3000:3000 -d crud-app
 ![image](https://github.com/user-attachments/assets/5c5660a5-f355-4379-a362-809c538da4d3)
 
 ![image](https://github.com/user-attachments/assets/646e1d08-bbb5-4605-b352-b695a26acbf8)
+
+
+### Grafana Dashboard
+
+https://github.com/user-attachments/assets/f1c60f81-e68b-4fcd-9702-92ba5385813d
+
+
