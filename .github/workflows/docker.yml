@@ -16,13 +16,15 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: SonarQube Scan
+      - name: Run SonarQube Analysis
         uses: kitabisa/sonarqube-action@master
         with:
           host: ${{ secrets.SONARQUBE_HOST }}
           login: ${{ secrets.SONARQUBE_TOKEN }}
           projectBaseDir: .
           encoding: UTF-8
+        env:
+          JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.11-9/x64
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
