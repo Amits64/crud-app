@@ -17,17 +17,23 @@ jobs:
           java-version: '17'
 
       - name: Setup SonarQube
-        uses: warchant/setup-sonar-scanner@v7
+        id: sonar-scanner
+        uses: warchant/setup-sonar-scanner@v1.0.0
 
       - name: SonarQube Scan
         env:
-          SONAR_SCANNER_HOME: ${{ steps.setup-sonar-scanner.outputs.scanner_home }}
+          SONAR_SCANNER_HOME: ${{ steps.sonar-scanner.outputs.scanner_home }}
+          JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.11-9/x64
+          SONAR_HOST: ${{ secrets.SONAR_HOST }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
+          SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
         run: |
           $SONAR_SCANNER_HOME/bin/sonar-scanner \
-            -Dsonar.host.url=${{ secrets.SONAR_HOST }} \
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
-            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }} \
-            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
+            -Dsonar.host.url=$SONAR_HOST \
+            -Dsonar.login=$SONAR_TOKEN \
+            -Dsonar.organization=$SONAR_ORGANIZATION \
+            -Dsonar.projectKey=$SONAR_PROJECT_KEY
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
