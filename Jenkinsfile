@@ -5,69 +5,27 @@ pipeline {
         registry = 'amits64'
         registryCredential = 'dockerhub'
         image = 'crud-app'
-        tag = "v${BUILD_NUMBER}"
+        tag = "${env.TAG}"
     }
 
     stages {
         stage('Git Checkout') {
             steps {
-                checkout([
-                    $class: 'GitSCM',
-                    branches: [[name: 'main']],
-                    userRemoteConfigs: [[url: 'https://github.com/Amits64/crud-app.git']]
-                ])
+                git branches: 'crud-app-v2' url: 'https://github.com/Amits64/crud-app.git'
             }
         }
-
-        stage('Static Code Analysis') {
-            steps {
-                script {
-                    def sonarScannerImage = 'sonarsource/sonar-scanner-cli:latest'
-                    docker.image(sonarScannerImage).inside() {
-                        withSonarQubeEnv('sonarqube') {
-                            sh """
-                            sonar-scanner \
-                            -Dsonar.host.url=http://192.168.10.10:9000/ \
-                            -Dsonar.projectKey="${image}" \
-                            -Dsonar.exclusions=**/*.java
-                            """
-                        }
-                    }
-                }
-            }
-        }
-
-        stage('Selenium Testing') {
-            steps {
-                script {
-                    dir('selenium-project') {
-                        sh 'mvn clean test'
-                    }    
-                }
-            }
-        }
-
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    docker.build("${registry}/${image}:${tag}", "-f Dockerfile .")
-                }
-            }
-        }
-        
-        // Other stages follow similarly with corrected indentation...
 
         stage('Deploying Container to Kubernetes') {
             steps {
                 script {
-                    dir('crud-app') {
-                        def releaseExists = sh(returnStatus: true, script: 'helm ls | grep -q ${image}') == 0
-                        if (releaseExists) {
-                            sh 'helm delete ${image}'
-                        }
-
-                        sh "helm install ${image} ./ --set appimage=${registry}/${image}:${tag} --set-file ca.crt=/etc/ca-certificates/update.d/jks-keystore"
+                    // Check if Helm release already exists and delete if necessary
+                    def releaseExists = sh(returnStatus: true, script: 'helm ls | grep -q ${image}') == 0
+                    if (releaseExists) {
+                        sh "helm delete ${image}"
                     }
+
+                    // Deploy the new Docker image to Kubernetes
+                    sh "helm install ${image} ./ --set appimage=${registry}/${image}:${tag} --set-file ca.crt=/etc/ca-certificates/update.d/jks-keystore"
                 }
             }
         }

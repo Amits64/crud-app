@@ -56,4 +56,6 @@ jobs:
         with:
           context: .
           push: true
-          tags: amits64/crud-app:${{ env.TIMESTAMP }}
+          tags: |
+            amits64/crud-app:${{ env.TIMESTAMP }}
+            amits64/crud-app:latest
