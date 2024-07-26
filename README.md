@@ -135,9 +135,16 @@ This project is a CRUD (Create, Read, Update, Delete) application built using No
 ### Prometheus Metrics
 Access Prometheus metrics at [http://localhost:3000/metrics](http://localhost:3000/metrics).
 
+
 ### Docker
 Build and run the application using Docker.
 ```sh
 docker build -t crud-app .
 docker run -p 3000:3000 -d crud-app
+```
 
+### Screenshots
+
+![image](https://github.com/user-attachments/assets/5c5660a5-f355-4379-a362-809c538da4d3)
+
+![image](https://github.com/user-attachments/assets/646e1d08-bbb5-4605-b352-b695a26acbf8)
