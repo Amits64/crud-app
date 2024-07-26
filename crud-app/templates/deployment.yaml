@@ -17,3 +17,12 @@ spec:
         image: {{ .Values.image.repository }}
         ports:
         - containerPort: 3000
+        env:
+        - name: DB_HOST
+          value: "10.102.255.53"
+        - name: DB_PORT
+          value: "3306"
+        - name: DB_USER
+          value: "root"
+        - name: DB_PASSWORD
+          value: "Kubernetes@1993"
