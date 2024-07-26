@@ -1,3 +1,2 @@
-http://192.168.10.10:9000/api/project_badges/measure?project=crud-app&metric=alert_status
-
+[![ci](https://github.com/Amits64/crud-app/actions/workflows/docker.yml/badge.svg)](https://github.com/Amits64/crud-app/actions/workflows/docker.yml)
 ## Crud-app-project
