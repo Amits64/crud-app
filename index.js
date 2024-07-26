@@ -23,7 +23,7 @@ client.collectDefaultMetrics({
 
 // MySQL connection using connection string
 const mysqlConnection = mysql.createPool({
-    host: 'mysql-stock-app.default.svc.cluster.local',
+    host: 'mysql-stock',
     user: 'root',
     password: 'Kubernetes@1993',
     database: 'accounts'
