@@ -234,7 +234,6 @@ app.put('/table/:dbName/:tableName/:id', async (req, res) => {
 
     try {
         const [result] = await mysqlConnection.query(`UPDATE ${dbName}.${tableName} SET ${updates} WHERE id = ?`, [...values, id]);
-        if (result.affectedRows === 0) return res.status(404).send('Row not found.');
 
         // Log the operation
         try {
@@ -243,7 +242,9 @@ app.put('/table/:dbName/:tableName/:id', async (req, res) => {
             console.error('Error logging operation:', logErr);
         }
 
-        res.send({ id, ...data });
+        if (result.affectedRows === 0) return res.status(404).send('Row not found.');
+
+        res.send({ id });
     } catch (err) {
         console.error('Error updating data:', err);
         res.status(500).send('Error updating data.');
@@ -256,7 +257,6 @@ app.delete('/table/:dbName/:tableName/:id', async (req, res) => {
 
     try {
         const [result] = await mysqlConnection.query(`DELETE FROM ${dbName}.${tableName} WHERE id = ?`, [id]);
-        if (result.affectedRows === 0) return res.status(404).send('Row not found.');
 
         // Log the operation
         try {
@@ -265,6 +265,8 @@ app.delete('/table/:dbName/:tableName/:id', async (req, res) => {
             console.error('Error logging operation:', logErr);
         }
 
+        if (result.affectedRows === 0) return res.status(404).send('Row not found.');
+
         res.send({ message: 'Row deleted successfully' });
     } catch (err) {
         console.error('Error deleting data:', err);
@@ -272,13 +274,22 @@ app.delete('/table/:dbName/:tableName/:id', async (req, res) => {
     }
 });
 
-// Metrics endpoint
+// Serve HTML file
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'index.html'));
+});
+
+// Prometheus metrics endpoint
 app.get('/metrics', async (req, res) => {
     res.setHeader('Content-Type', register.contentType);
     res.send(await register.metrics());
 });
 
-// Start the server
+// 404 handler
+app.use((req, res) => {
+    res.status(404).send('404: Page not found');
+});
+
 app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
+    console.log(`Server listening at http://localhost:${port}`);
 });
