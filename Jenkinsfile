@@ -1,3 +1,8 @@
+def COLOR_MAP = [
+    'SUCCESS': 'good',
+    'FAILURE': 'danger'
+]
+
 pipeline {
     agent any
 
@@ -43,6 +48,20 @@ pipeline {
 
                     // Deploy the new Docker image to Kubernetes using Helm
                     sh "helm install ${image} ${chartDirectory} --set image.repository=${registry}/${image} --set image.tag=${tag} --set-file ca.crt=/etc/ca-certificates/update.d/jks-keystore"
+                }
+            }
+            post {
+                always {
+                    echo 'Slack Notifications.'
+                    slackSend(
+                        channel: '#jenkinscicd',
+                        color: COLOR_MAP.get(currentBuild.currentResult),
+                        message: """
+                        SonarQube analysis for ${env.JOB_NAME} build ${env.BUILD_NUMBER}
+                        Status: *${currentBuild.currentResult}*
+                        More info: ${env.BUILD_URL}
+                        """
+                    )
                 }
             }
         }
