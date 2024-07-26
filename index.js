@@ -21,12 +21,12 @@ client.collectDefaultMetrics({
     register
 });
 
-// MySQL connection using connection string
+// MySQL connection using environment variables
 const mysqlConnection = mysql.createPool({
-    host: 'mysql-stock-app',
-    user: 'root',
-    password: 'Kubernetes@1993',
-    database: 'accounts'
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME
 });
 
 // Test MySQL connection
@@ -237,14 +237,13 @@ app.put('/table/:dbName/:tableName/:id', async (req, res) => {
 
         // Log the operation
         try {
-            await mysqlConnection.query('INSERT INTO logs (operation, table_name, data, timestamp) VALUES (?, ?, ?, NOW())', ['UPDATE', `${dbName}.${tableName}`, JSON.stringify(data)]);
+            await mysqlConnection.query('INSERT INTO logs (operation, table_name, data, timestamp) VALUES (?, ?, ?, NOW())', ['UPDATE', `${dbName}.${tableName}`, JSON.stringify({ id, ...data })]);
         } catch (logErr) {
             console.error('Error logging operation:', logErr);
         }
 
         if (result.affectedRows === 0) return res.status(404).send('Row not found.');
-
-        res.send({ id });
+        res.send({ message: 'Row updated successfully' });
     } catch (err) {
         console.error('Error updating data:', err);
         res.status(500).send('Error updating data.');
@@ -254,7 +253,6 @@ app.put('/table/:dbName/:tableName/:id', async (req, res) => {
 // Delete row from table
 app.delete('/table/:dbName/:tableName/:id', async (req, res) => {
     const { dbName, tableName, id } = req.params;
-
     try {
         const [result] = await mysqlConnection.query(`DELETE FROM ${dbName}.${tableName} WHERE id = ?`, [id]);
 
@@ -266,7 +264,6 @@ app.delete('/table/:dbName/:tableName/:id', async (req, res) => {
         }
 
         if (result.affectedRows === 0) return res.status(404).send('Row not found.');
-
         res.send({ message: 'Row deleted successfully' });
     } catch (err) {
         console.error('Error deleting data:', err);
@@ -274,22 +271,24 @@ app.delete('/table/:dbName/:tableName/:id', async (req, res) => {
     }
 });
 
-// Serve HTML file
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'views', 'index.html'));
-});
-
-// Prometheus metrics endpoint
+// Get Prometheus metrics
 app.get('/metrics', async (req, res) => {
-    res.setHeader('Content-Type', register.contentType);
-    res.send(await register.metrics());
+    try {
+        res.set('Content-Type', register.contentType);
+        res.end(await register.metrics());
+    } catch (err) {
+        console.error('Error fetching metrics:', err);
+        res.status(500).send('Error fetching metrics.');
+    }
 });
 
-// 404 handler
-app.use((req, res) => {
-    res.status(404).send('404: Page not found');
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error('Error:', err.stack);
+    res.status(500).send('Something broke!');
 });
 
+// Start the server
 app.listen(port, () => {
-    console.log(`Server listening at http://localhost:${port}`);
+    console.log(`Server running at http://localhost:${port}`);
 });

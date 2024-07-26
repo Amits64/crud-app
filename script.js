@@ -122,6 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => notificationModal.classList.add('hidden'), 5000);
     }
 
+    // Utility functions
     window.closeNotification = () => document.getElementById('notification-modal').classList.add('hidden');
     window.closeModal = () => document.getElementById('confirmation-modal').classList.add('hidden');
     window.confirmAction = () => {
@@ -130,5 +131,5 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Example fetch on page load
-    fetchTableData('crypto_coins', 'logs'); // Replace with actual DB and table names
+    fetchTableData('accounts', 'logs'); // Replace with actual DB and table names
 });
