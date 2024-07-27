@@ -4,12 +4,13 @@ const client = require('prom-client');
 const dotenv = require('dotenv');
 const bcrypt = require('bcrypt');
 const path = require('path');
+const helmet = require('helmet');
+const morgan = require('morgan');
 
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3000;
-
 const register = new client.Registry();
 
 // Collect default metrics
@@ -42,6 +43,11 @@ const mysqlConnection = mysql.createPool({
 // Middleware
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'views')));
+app.use(helmet()); // Secure headers
+app.use(morgan('combined')); // Logging
+
+// Disable x-powered-by header
+app.disable('x-powered-by');
 
 // Get logs with pagination
 app.get('/logs', async (req, res) => {
@@ -229,20 +235,20 @@ app.post('/table/:dbName/:tableName', async (req, res) => {
 app.put('/table/:dbName/:tableName/:id', async (req, res) => {
     const { dbName, tableName, id } = req.params;
     const data = req.body;
-    const updates = Object.keys(data).map(key => `${key} = ?`).join(', ');
-    const values = Object.values(data);
+    const updates = Object.entries(data).map(([key, value]) => `${key} = ?`).join(', ');
+    const values = [...Object.values(data), id];
 
     try {
-        const [result] = await mysqlConnection.query(`UPDATE ${dbName}.${tableName} SET ${updates} WHERE id = ?`, [...values, id]);
+        const [result] = await mysqlConnection.query(`UPDATE ${dbName}.${tableName} SET ${updates} WHERE id = ?`, values);
+        if (result.affectedRows === 0) return res.status(404).send('Row not found.');
 
         // Log the operation
         try {
-            await mysqlConnection.query('INSERT INTO logs (operation, table_name, data, timestamp) VALUES (?, ?, ?, NOW())', ['UPDATE', `${dbName}.${tableName}`, JSON.stringify({ id, ...data })]);
+            await mysqlConnection.query('INSERT INTO logs (operation, table_name, data, timestamp) VALUES (?, ?, ?, NOW())', ['UPDATE', `${dbName}.${tableName}`, JSON.stringify(data)]);
         } catch (logErr) {
             console.error('Error logging operation:', logErr);
         }
 
-        if (result.affectedRows === 0) return res.status(404).send('Row not found.');
         res.send({ message: 'Row updated successfully' });
     } catch (err) {
         console.error('Error updating data:', err);
@@ -253,8 +259,10 @@ app.put('/table/:dbName/:tableName/:id', async (req, res) => {
 // Delete row from table
 app.delete('/table/:dbName/:tableName/:id', async (req, res) => {
     const { dbName, tableName, id } = req.params;
+
     try {
         const [result] = await mysqlConnection.query(`DELETE FROM ${dbName}.${tableName} WHERE id = ?`, [id]);
+        if (result.affectedRows === 0) return res.status(404).send('Row not found.');
 
         // Log the operation
         try {
@@ -263,7 +271,6 @@ app.delete('/table/:dbName/:tableName/:id', async (req, res) => {
             console.error('Error logging operation:', logErr);
         }
 
-        if (result.affectedRows === 0) return res.status(404).send('Row not found.');
         res.send({ message: 'Row deleted successfully' });
     } catch (err) {
         console.error('Error deleting data:', err);
@@ -271,24 +278,23 @@ app.delete('/table/:dbName/:tableName/:id', async (req, res) => {
     }
 });
 
-// Get Prometheus metrics
+// Metrics endpoint
 app.get('/metrics', async (req, res) => {
-    try {
-        res.set('Content-Type', register.contentType);
-        res.end(await register.metrics());
-    } catch (err) {
-        console.error('Error fetching metrics:', err);
-        res.status(500).send('Error fetching metrics.');
-    }
+    res.set('Content-Type', register.contentType);
+    res.end(await register.metrics());
 });
 
-// Error handling middleware
+// 404 handler
+app.use((req, res) => {
+    res.status(404).send('Page not found');
+});
+
+// Error handler middleware
 app.use((err, req, res, next) => {
-    console.error('Error:', err.stack);
-    res.status(500).send('Something broke!');
+    console.error('Unhandled error:', err);
+    res.status(500).send('Internal server error');
 });
 
-// Start the server
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
