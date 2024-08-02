@@ -1,4 +1,4 @@
-name: ci
+name: crud-v2-ci
 
 on:
   push:
