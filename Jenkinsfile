@@ -1,3 +1,5 @@
+@Library('shared-pipeline-lib') _
+
 pipeline {
     agent any
 
@@ -6,56 +8,22 @@ pipeline {
         registryCredential = 'dockerhub'
         image = 'crud-app'
         tag = "v${BUILD_NUMBER}"
+        sonarHostUrl = 'http://192.168.2.20:9000/'
     }
 
     stages {
-        stage('Git Checkout') {
+        stage('CI') {
             steps {
-                checkout([
-                    $class: 'GitSCM',
-                    branches: [[name: 'main']],
-                    userRemoteConfigs: [[url: 'https://github.com/Amits64/crud-app.git']]
-                ])
+                // Call the shared library function for CI
+                ciPipeline(
+                    registry: registry,
+                    registryCredential: registryCredential,
+                    image: image,
+                    tag: tag,
+                    sonarHostUrl: sonarHostUrl
+                )
             }
         }
-
-        stage('Static Code Analysis') {
-            steps {
-                script {
-                    def sonarScannerImage = 'sonarsource/sonar-scanner-cli:latest'
-                    docker.image(sonarScannerImage).inside() {
-                        withSonarQubeEnv('sonarqube') {
-                            sh """
-                            sonar-scanner \
-                            -Dsonar.host.url=http://192.168.10.10:9000/ \
-                            -Dsonar.projectKey="${image}" \
-                            -Dsonar.exclusions=**/*.java
-                            """
-                        }
-                    }
-                }
-            }
-        }
-
-        stage('Selenium Testing') {
-            steps {
-                script {
-                    dir('selenium-project') {
-                        sh 'mvn clean test'
-                    }    
-                }
-            }
-        }
-
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    docker.build("${registry}/${image}:${tag}", "-f Dockerfile .")
-                }
-            }
-        }
-        
-        // Other stages follow similarly with corrected indentation...
 
         stage('Deploying Container to Kubernetes') {
             steps {
