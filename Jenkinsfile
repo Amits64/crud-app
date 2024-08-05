@@ -47,7 +47,7 @@ pipeline {
         always {
             script {
                 if (currentBuild.result != 'SUCCESS') {
-                    error("Selenium tests failed!")
+                    error("Container deployment failed!")
                 }
             }
         }
