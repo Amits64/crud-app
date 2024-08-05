@@ -31,6 +31,9 @@ pipeline {
             steps {
                 script {
                     dir('crud-app') {
+                        // Debugging step to print Helm version
+                        sh 'helm version'
+
                         def releaseExists = sh(returnStatus: true, script: 'helm ls | grep -q ${image}') == 0
                         if (releaseExists) {
                             sh 'helm delete ${image}'
