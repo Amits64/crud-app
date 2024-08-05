@@ -9,6 +9,7 @@ pipeline {
         image = 'crud-app'
         tag = "v${BUILD_NUMBER}"
         sonarHostUrl = 'http://192.168.2.20:9000/'
+        repoUrl = 'https://github.com/Amits64/crud-app.git' // Add your repository URL here
     }
 
     stages {
@@ -20,7 +21,8 @@ pipeline {
                     registryCredential: registryCredential,
                     image: image,
                     tag: tag,
-                    sonarHostUrl: sonarHostUrl
+                    sonarHostUrl: sonarHostUrl,
+                    repoUrl: repoUrl
                 )
             }
         }
@@ -45,7 +47,7 @@ pipeline {
         always {
             script {
                 if (currentBuild.result != 'SUCCESS') {
-                    error("Containers deployment failed!")
+                    error("Selenium tests failed!")
                 }
             }
         }
