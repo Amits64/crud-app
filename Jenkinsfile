@@ -44,9 +44,8 @@ pipeline {
     post {
         always {
             script {
-                def testResults = currentBuild.resultIsBetterOrEqualTo('SUCCESS') ? 0 : 1
-                if (testResults != 0) {
-                    error("Selenium tests failed!")
+                if (currentBuild.result != 'SUCCESS') {
+                    error("Containers deployment failed!")
                 }
             }
         }
