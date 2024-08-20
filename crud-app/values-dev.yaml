@@ -1,0 +1,83 @@
+# Default values for crud-app in the dev environment.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1  # Typically lower for development environments
+
+image:
+  repository: amits64/crud-app
+  pullPolicy: IfNotPresent
+  tag: "dev-${BUILD_NUMBER}"  # Use a specific tag for dev
+
+imagePullSecrets:
+  - name: my-registry-secret  # Optional, if you use private registry
+
+nameOverride: "crud-app-dev"
+fullnameOverride: "crud-app-dev"
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: "crud-app-dev-sa"  # Specific service account for dev
+
+podAnnotations:
+  kubernetes.io/cluster-service: "true"
+
+podSecurityContext:
+  fsGroup: 2000
+
+securityContext:
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: false
+  runAsNonRoot: false
+  runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false  # Ingress typically not used in dev
+  className: ""
+  annotations: {}
+  hosts:
+    - host: dev.chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
+
+autoscaling:
+  enabled: false  # Autoscaling usually disabled in dev
+  minReplicas: 1
+  maxReplicas: 2
+  targetCPUUtilizationPercentage: 80
+
+nodeSelector:
+  environment: dev
+
+tolerations:
+  - key: "environment"
+    operator: "Equal"
+    value: "dev"
+    effect: "NoSchedule"
+
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: "kubernetes.io/role"
+              operator: "In"
+              values:
+                - "dev"

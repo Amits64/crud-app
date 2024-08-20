@@ -3,44 +3,41 @@
 pipeline {
     agent any
 
+    parameters {
+        choice(name: 'NAMESPACE', choices: ['cde', 'ncde'], description: 'Select Namespace')
+        choice(name: 'ENVIRONMENT', choices: ['dev', 'qa', 'prod'], description: 'Select the deployment environment')
+        string(name: 'IMAGE_TAG', defaultValue: '', description: 'Docker image tag')
+    }
+
     environment {
         registry = 'amits64'
         registryCredential = 'dockerhub'
         image = 'crud-app'
-        tag = "v${BUILD_NUMBER}"
-        sonarHostUrl = 'http://192.168.2.20:9000/'
-        repoUrl = 'https://github.com/Amits64/crud-app.git' // Add your repository URL here
+        tag = "${params.IMAGE_TAG}"  // Use IMAGE_TAG parameter
+        kubeConfigPath = "/etc/kubernetes/${params.ENVIRONMENT}/config" // Adjusted for dynamic environment
     }
 
     stages {
-        stage('CI') {
-            steps {
-                // Call the shared library function for CI
-                ciPipeline(
-                    registry: registry,
-                    registryCredential: registryCredential,
-                    image: image,
-                    tag: tag,
-                    sonarHostUrl: sonarHostUrl,
-                    repoUrl: repoUrl
-                )
-            }
-        }
-
         stage('Deploying Container to Kubernetes') {
             steps {
                 script {
-                    dir('crud-app') {
-                        // Debugging step to print Helm version
-                        sh 'helm version'
+                    sh 'helm version'
 
-                        def releaseExists = sh(returnStatus: true, script: 'helm ls | grep -q ${image}') == 0
-                        if (releaseExists) {
-                            sh 'helm delete ${image}'
-                        }
+                    def releaseExists = sh(returnStatus: true, script: "helm ls --kubeconfig ${kubeConfigPath} | grep -q ${image}") == 0
 
-                        sh "helm install ${image} ./ --set appimage=${registry}/${image}:${tag} --set-file ca.crt=/etc/ca-certificates/update.d/jks-keystore"
+                    if (releaseExists) {
+                        echo "Existing Helm release found. Deleting release: ${image}"
+                        sh "helm delete ${image} --kubeconfig ${kubeConfigPath}"
+                    } else {
+                        echo "No existing Helm release found for ${image}. Proceeding with installation."
                     }
+
+                    sh """
+                    helm upgrade --install ${image} ./ \
+                    --kubeconfig ${kubeConfigPath} \
+                    --set appimage=${registry}/${image}:${tag} \
+                    --namespace ${params.NAMESPACE}
+                    """
                 }
             }
         }
@@ -51,6 +48,8 @@ pipeline {
             script {
                 if (currentBuild.result != 'SUCCESS') {
                     error("Container deployment failed!")
+                } else {
+                    echo "Container deployment succeeded!"
                 }
             }
         }

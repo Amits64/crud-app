@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
   sonarcloud:
@@ -47,13 +51,9 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Set current timestamp
-        id: timestamp
-        run: echo "TIMESTAMP=$(date +%s)" >> $GITHUB_ENV
-
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
           context: .
           push: true
-          tags: amits64/crud-app:${{ env.TIMESTAMP }}
+          tags: amits64/crud-app:${{ github.run_number }}
