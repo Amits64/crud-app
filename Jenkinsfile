@@ -1,5 +1,3 @@
-@Library('shared-pipeline-lib') _
-
 pipeline {
     agent any
 
@@ -13,11 +11,21 @@ pipeline {
         registry = 'amits64'
         registryCredential = 'dockerhub'
         image = 'crud-app'
-        tag = "${params.IMAGE_TAG}"  // Use IMAGE_TAG parameter
+        tag = "v${env.BUILD_NUMBER}"  // Use the Jenkins build number
         kubeConfigPath = "/etc/kubernetes/${params.ENVIRONMENT}/config" // Adjusted for dynamic environment
     }
 
     stages {
+        stage('Verify Kubernetes Config') {
+            steps {
+                script {
+                    // Debug steps to verify the Kubernetes configuration file
+                    sh "ls -la /etc/kubernetes/${params.ENVIRONMENT}"
+                    sh "cat /etc/kubernetes/${params.ENVIRONMENT}/config"
+                }
+            }
+        }
+
         stage('Deploying Container to Kubernetes') {
             steps {
                 script {
@@ -35,7 +43,7 @@ pipeline {
                     sh """
                     helm upgrade --install ${image} ./ \
                     --kubeconfig ${kubeConfigPath} \
-                    --set appimage=${registry}/${image}:v${tag} \
+                    --set appimage=${registry}/${image}:${tag} \
                     --namespace ${params.NAMESPACE}
                     """
                 }
