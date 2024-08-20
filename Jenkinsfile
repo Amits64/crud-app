@@ -12,7 +12,7 @@ pipeline {
         registryCredential = 'dockerhub'
         image = 'crud-app'
         tag = "v${env.BUILD_NUMBER}"  // Use the Jenkins build number
-        kubeConfigPath = "/etc/kubernetes/${params.ENVIRONMENT}/config" // Adjusted for dynamic environment
+        kubeConfigPath = "~/.kube/${params.ENVIRONMENT}/config" // Adjusted for dynamic environment
     }
 
     stages {
@@ -20,8 +20,8 @@ pipeline {
             steps {
                 script {
                     // Debug steps to verify the Kubernetes configuration file
-                    sh "ls -la /etc/kubernetes/${params.ENVIRONMENT}"
-                    sh "cat /etc/kubernetes/${params.ENVIRONMENT}/config"
+                    sh "ls -la ~/.kube/${params.ENVIRONMENT}"
+                    sh "cat ~/.kube/${params.ENVIRONMENT}/config"
                 }
             }
         }
