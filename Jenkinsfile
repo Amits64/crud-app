@@ -29,23 +29,25 @@ pipeline {
         stage('Deploying Container to Kubernetes') {
             steps {
                 script {
-                    sh 'helm version'
+                    dir('crud-app') {
+                        sh 'helm version'
 
-                    def releaseExists = sh(returnStatus: true, script: "helm ls --kubeconfig ${kubeConfigPath} | grep -q ${image}") == 0
+                        def releaseExists = sh(returnStatus: true, script: "helm ls --kubeconfig ${kubeConfigPath} | grep -q ${image}") == 0
 
-                    if (releaseExists) {
-                        echo "Existing Helm release found. Deleting release: ${image}"
-                        sh "helm delete ${image} --kubeconfig ${kubeConfigPath}"
-                    } else {
-                        echo "No existing Helm release found for ${image}. Proceeding with installation."
+                        if (releaseExists) {
+                            echo "Existing Helm release found. Deleting release: ${image}"
+                            sh "helm delete ${image} --kubeconfig ${kubeConfigPath}"
+                        } else {
+                            echo "No existing Helm release found for ${image}. Proceeding with installation."
+                        }
+
+                        sh """
+                        helm upgrade --install ${image} ./ \
+                        --kubeconfig ${kubeConfigPath} \
+                        --set appimage=${registry}/${image}:${tag} \
+                        --namespace ${params.NAMESPACE}
+                        """
                     }
-
-                    sh """
-                    helm upgrade --install ${image} ./ \
-                    --kubeconfig ${kubeConfigPath} \
-                    --set appimage=${registry}/${image}:${tag} \
-                    --namespace ${params.NAMESPACE}
-                    """
                 }
             }
         }
