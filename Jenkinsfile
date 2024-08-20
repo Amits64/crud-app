@@ -35,7 +35,7 @@ pipeline {
                     sh """
                     helm upgrade --install ${image} ./ \
                     --kubeconfig ${kubeConfigPath} \
-                    --set appimage=${registry}/${image}:${tag} \
+                    --set appimage=${registry}/${image}:v${tag} \
                     --namespace ${params.NAMESPACE}
                     """
                 }
