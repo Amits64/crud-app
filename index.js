@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt');
 const path = require('path');
 const helmet = require('helmet');
 const morgan = require('morgan');
+require('newrelic');
 
 dotenv.config();
 

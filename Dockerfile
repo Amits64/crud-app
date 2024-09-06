@@ -24,6 +24,10 @@ RUN groupadd -g 1001 nonroot && useradd -u 1001 -g nonroot -m nonroot
 # Create a directory for your app and set it as the working directory
 WORKDIR /usr/src/app
 
+ENV NEW_RELIC_NO_CONFIG_FILE=true
+ENV NEW_RELIC_DISTRIBUTED_TRACING_ENABLED=true
+ENV NEW_RELIC_LOG=stdout
+
 # Copy only the necessary files from the build stage
 COPY --from=build /usr/src/app /usr/src/app
 
