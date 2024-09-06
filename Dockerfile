@@ -1,22 +1,25 @@
 # Stage 1: Build Stage
-FROM node:18.19.1-bookworm-slim AS build
+FROM node:18.19.1 AS build
+
+# Set environment variables for New Relic
+ENV NEW_RELIC_NO_CONFIG_FILE=true
+ENV NEW_RELIC_DISTRIBUTED_TRACING_ENABLED=true
+ENV NEW_RELIC_LOG=stdout
 
 # Create a directory for your app and set it as the working directory
 WORKDIR /usr/src/app
 
-# Copy specific files and directories required for the image to run
-COPY package.json .
-COPY package-lock.json .
+# Copy package.json and package-lock.json for dependency installation
+COPY package*.json ./
 
-# Install app dependencies and update npm
-RUN npm install -g npm@10.8.2
+# Install app dependencies
 RUN npm install
 
-# Copy the rest of the application code including views directory
+# Copy the rest of the application code
 COPY . .
 
 # Stage 2: Production Stage
-FROM node:18.19.1-bookworm-slim
+FROM node:18.19.1
 
 # Create a non-root user and group for running the application
 RUN groupadd -g 1001 nonroot && useradd -u 1001 -g nonroot -m nonroot
@@ -24,6 +27,7 @@ RUN groupadd -g 1001 nonroot && useradd -u 1001 -g nonroot -m nonroot
 # Create a directory for your app and set it as the working directory
 WORKDIR /usr/src/app
 
+# Set environment variables for New Relic
 ENV NEW_RELIC_NO_CONFIG_FILE=true
 ENV NEW_RELIC_DISTRIBUTED_TRACING_ENABLED=true
 ENV NEW_RELIC_LOG=stdout
