@@ -12,11 +12,17 @@ WORKDIR /usr/src/app
 # Copy package.json and package-lock.json for dependency installation
 COPY package*.json ./
 
-# Install app dependencies
-RUN npm install
+# Install app dependencies using npm ci for a clean, reproducible environment
+RUN npm ci --only=production
 
 # Copy the rest of the application code
 COPY . .
+
+# Run build script (if applicable)
+# RUN npm run build
+
+# Remove any unnecessary files like development dependencies
+# RUN npm prune --production
 
 # Stage 2: Production Stage
 FROM node:18.19.1
@@ -40,6 +46,10 @@ EXPOSE 3000
 
 # Switch to the non-root user for running the application
 USER nonroot
+
+# Add a health check to ensure the container is running properly
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+  CMD curl --fail http://localhost:3000/ || exit 1
 
 # Define the command to run your Node.js application
 CMD ["node", "index.js"]
